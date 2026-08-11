@@ -77,7 +77,11 @@
             text-align: center;
             font-size: 20px;
             font-weight: bold;
-            color: #4ade80; /* зелёный цвет для правильного ответа */
+            color: #4ade80;
+        }
+
+        .result-multiple {
+            color: #facc15;
         }
 
         table {
@@ -122,9 +126,9 @@
             <label for="gas">Тип газа:</label>
             <select id="gas">
                 <option value="">Выберите...</option>
+                <option value="helium">Helium (Гелий)</option>
                 <option value="nitrogen">Nitrogen (Азот)</option>
                 <option value="deuterium">Deuterium (Дейтерий)</option>
-                <option value="helium">Helium (Гелий)</option>
             </select>
 
             <label for="hoses">Количество шлангов:</label>
@@ -138,8 +142,8 @@
             <label for="pressure">Давление:</label>
             <select id="pressure">
                 <option value="">Выберите...</option>
-                <option value="high">≥ 5783 PSI (Высокое)</option>
-                <option value="low">≤ 5812 PSI (Низкое)</option>
+                <option value="5783">≥ 5783 PSI</option>
+                <option value="5812">≤ 5812 PSI</option>
             </select>
 
             <button onclick="calculateEngine()">Рассчитать</button>
@@ -158,18 +162,18 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <tr><td>Nitrogen</td><td>H</td><td>Высокое</td><td>3</td></tr>
-                    <tr><td>Nitrogen</td><td>2H</td><td>Низкое</td><td>7</td></tr>
-                    <tr><td>Nitrogen</td><td>3H</td><td>Высокое</td><td>11</td></tr>
-                    <tr><td>Deuterium</td><td>H</td><td>Низкое</td><td>2</td></tr>
-                    <tr><td>Deuterium</td><td>2H</td><td>Высокое</td><td>6</td></tr>
-                    <tr><td>Deuterium</td><td>3H</td><td>Низкое</td><td>10</td></tr>
-                    <tr><td>Helium</td><td>H</td><td>Высокое</td><td>1</td></tr>
-                    <tr><td>Helium</td><td>2H</td><td>Низкое</td><td>5</td></tr>
-                    <tr><td>Helium</td><td>3H</td><td>Высокое</td><td>9</td></tr>
-                    <tr><td>Nitrogen</td><td>H</td><td>Низкое</td><td>4</td></tr>
-                    <tr><td>Deuterium</td><td>2H</td><td>Низкое</td><td>8</td></tr>
-                    <tr><td>Helium</td><td>3H</td><td>Низкое</td><td>12</td></tr>
+                    <tr><td>Helium</td><td>2H</td><td>Без разницы</td><td>3</td></tr>
+                    <tr><td>Helium</td><td>3H</td><td>≤ 5812 PSI</td><td>7</td></tr>
+                    <tr><td>Nitrogen</td><td>3H</td><td>≥ 5783 PSI</td><td>11</td></tr>
+                    <tr><td>Deuterium</td><td>H</td><td>≥ 5783 PSI</td><td>2</td></tr>
+                    <tr><td>Helium</td><td>2H</td><td>≥ 5783 PSI</td><td>6</td></tr>
+                    <tr><td>Helium</td><td>3H</td><td>Без разницы</td><td>10</td></tr>
+                    <tr><td>Nitrogen</td><td>H</td><td>≤ 5812 PSI</td><td>1</td></tr>
+                    <tr><td>Deuterium</td><td>2H</td><td>≤ 5812 PSI</td><td>5</td></tr>
+                    <tr><td>Deuterium</td><td>3H</td><td>≤ 5812 PSI</td><td>9</td></tr>
+                    <tr><td>Nitrogen</td><td>2H</td><td>Без разницы</td><td>4</td></tr>
+                    <tr><td>Nitrogen</td><td>3H</td><td>≤ 5812 PSI</td><td>8</td></tr>
+                    <tr><td>Deuterium</td><td>3H</td><td>≥ 5783 PSI</td><td>12</td></tr>
                 </tbody>
             </table>
         </div>
@@ -187,28 +191,44 @@
                 return;
             }
 
-            // Таблица соответствий
+            // Таблица соответствий (строго по данным из таблицы)
+            // "Без разницы" обрабатывается как ИЛИ (оба давления)
             const combos = [
-                { gas: 'nitrogen', hoses: '1', pressure: 'high', engine: 3 },
-                { gas: 'nitrogen', hoses: '2', pressure: 'low', engine: 7 },
-                { gas: 'nitrogen', hoses: '3', pressure: 'high', engine: 11 },
-                { gas: 'deuterium', hoses: '1', pressure: 'low', engine: 2 },
-                { gas: 'deuterium', hoses: '2', pressure: 'high', engine: 6 },
-                { gas: 'deuterium', hoses: '3', pressure: 'low', engine: 10 },
-                { gas: 'helium', hoses: '1', pressure: 'high', engine: 1 },
-                { gas: 'helium', hoses: '2', pressure: 'low', engine: 5 },
-                { gas: 'helium', hoses: '3', pressure: 'high', engine: 9 },
-                { gas: 'nitrogen', hoses: '1', pressure: 'low', engine: 4 },
-                { gas: 'deuterium', hoses: '2', pressure: 'low', engine: 8 },
-                { gas: 'helium', hoses: '3', pressure: 'low', engine: 12 }
+                // Helium
+                { gas: 'helium', hoses: '2', pressure: 'any', engine: 3 },
+                { gas: 'helium', hoses: '3', pressure: '5812', engine: 7 },
+                { gas: 'helium', hoses: '2', pressure: '5783', engine: 6 },
+                { gas: 'helium', hoses: '3', pressure: 'any', engine: 10 },
+                // Nitrogen
+                { gas: 'nitrogen', hoses: '3', pressure: '5783', engine: 11 },
+                { gas: 'nitrogen', hoses: '1', pressure: '5812', engine: 1 },
+                { gas: 'nitrogen', hoses: '2', pressure: 'any', engine: 4 },
+                { gas: 'nitrogen', hoses: '3', pressure: '5812', engine: 8 },
+                // Deuterium
+                { gas: 'deuterium', hoses: '1', pressure: '5783', engine: 2 },
+                { gas: 'deuterium', hoses: '2', pressure: '5812', engine: 5 },
+                { gas: 'deuterium', hoses: '3', pressure: '5812', engine: 9 },
+                { gas: 'deuterium', hoses: '3', pressure: '5783', engine: 12 }
             ];
 
-            const match = combos.find(c => c.gas === gas && c.hoses === hoses && c.pressure === pressure);
+            // Ищем совпадения: для "any" подходит любое давление
+            const matches = combos.filter(c => {
+                if (c.gas !== gas || c.hoses !== hoses) return false;
+                if (c.pressure === 'any') return true;
+                return c.pressure === pressure;
+            });
 
-            if (match) {
-                resultDiv.innerHTML = `<strong>Правильный двигатель: №${match.engine}</strong>`;
-            } else {
+            if (matches.length === 0) {
                 resultDiv.innerHTML = '<strong style="color:#f87171">Неверная комбинация параметров</strong>';
+                return;
+            }
+
+            if (matches.length === 1) {
+                resultDiv.innerHTML = `<strong>Правильный двигатель: №${matches[0].engine}</strong>`;
+            } else {
+                // Несколько вариантов (случай "Без разницы" или дубли)
+                const engines = matches.map(m => m.engine).join(', ');
+                resultDiv.innerHTML = `<strong class="result-multiple">Возможные двигатели: №${engines}</strong>`;
             }
         }
     </script>
